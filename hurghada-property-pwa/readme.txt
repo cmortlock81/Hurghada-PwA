@@ -1,5 +1,3 @@
-# Hurghada-PwA
-Standalone PWA plugin 
 === Hurghada Property PWA ===
 Contributors: hurghadaapartmentsales
 Requires at least: 6.0
