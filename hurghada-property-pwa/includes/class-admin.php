@@ -9,7 +9,8 @@ final class HPPWA_Admin {
     public function save(): void {
         if (!isset($_POST['hppwa_save']) || !current_user_can('manage_options')) { return; }
         check_admin_referer('hppwa_save_settings');
-        $keys = array_keys(HPPWA_Plugin::defaults()); $settings = HPPWA_Plugin::settings();
+        $tab = sanitize_key($_POST['hppwa_tab'] ?? $_GET['tab'] ?? 'general');
+        $keys = array_keys($this->fields($tab)); $settings = HPPWA_Plugin::settings();
         foreach ($keys as $key) { if (isset($_POST[$key])) { $settings[$key] = in_array($key, ['firebase_service_account','enquiry_shortcode'], true) ? wp_kses_post(wp_unslash($_POST[$key])) : sanitize_text_field(wp_unslash($_POST[$key])); } else if (str_starts_with($key, 'enable_') || $key === 'show_currency_labels') { $settings[$key] = '0'; } }
         HPPWA_Plugin::update_settings($settings); add_settings_error('hppwa', 'saved', 'Settings saved.', 'updated');
     }
@@ -18,7 +19,7 @@ final class HPPWA_Admin {
         $tab = sanitize_key($_GET['tab'] ?? 'general'); $s = HPPWA_Plugin::settings(); settings_errors('hppwa');
         echo '<div class="wrap"><h1>Hurghada PWA</h1><nav class="nav-tab-wrapper">'; foreach (['general','listings','pwa','firebase','diagnostics'] as $t) { echo '<a class="nav-tab '.esc_attr($tab===$t?'nav-tab-active':'').'" href="'.esc_url(admin_url('admin.php?page=hurghada-pwa&tab='.$t)).'">'.esc_html(ucfirst($t)).'</a>'; } echo '</nav>';
         if ($tab === 'diagnostics') { $this->diagnostics(); echo '</div>'; return; }
-        echo '<form method="post">'; wp_nonce_field('hppwa_save_settings'); echo '<table class="form-table"><tbody>';
+        echo '<form method="post">'; wp_nonce_field('hppwa_save_settings'); echo '<input type="hidden" name="hppwa_tab" value="'.esc_attr($tab).'"><table class="form-table"><tbody>';
         $fields = $this->fields($tab); foreach ($fields as $key=>$label) { $value = $s[$key] ?? ''; echo '<tr><th><label for="'.esc_attr($key).'">'.esc_html($label).'</label></th><td>'; if (str_starts_with($key,'enable_') || $key==='show_currency_labels') { echo '<input type="checkbox" name="'.esc_attr($key).'" value="1" '.checked($value,'1',false).'>'; } elseif ($key === 'firebase_service_account') { echo '<textarea class="large-text code" rows="8" name="'.esc_attr($key).'">'.esc_textarea($value).'</textarea>'; } else { echo '<input class="regular-text" type="text" name="'.esc_attr($key).'" value="'.esc_attr($value).'">'; } echo '</td></tr>'; }
         echo '</tbody></table><p><button class="button button-primary" name="hppwa_save" value="1">Save Settings</button></p></form></div>';
     }

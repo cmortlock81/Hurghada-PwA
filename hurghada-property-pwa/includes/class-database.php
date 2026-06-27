@@ -19,7 +19,9 @@ final class HPPWA_Database {
             PRIMARY KEY  (id),
             UNIQUE KEY token_hash (token_hash)
         ) $charset;");
-        if (class_exists('HPPWA_Routes')) { HPPWA_Routes::add_rules(); flush_rewrite_rules(); }
+        if (class_exists('HPPWA_Routes')) { HPPWA_Routes::add_rules(); }
+        if (class_exists('HPPWA_PWA')) { (new HPPWA_PWA())->rules(); }
+        flush_rewrite_rules();
     }
     public static function count_tokens(): int { global $wpdb; return (int) $wpdb->get_var("SELECT COUNT(*) FROM " . self::table()); }
 }
