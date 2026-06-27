@@ -41,7 +41,7 @@ final class HPPWA_Routes {
         $settings = HPPWA_Plugin::settings();
         $template = HPPWA_DIR . 'templates/app-' . ($route === 'home' ? 'home' : sanitize_file_name($route)) . '.php';
         if (!file_exists($template)) { $template = HPPWA_DIR . 'templates/app-home.php'; }
-        ?><!doctype html><html <?php language_attributes(); ?>><head><?php wp_head(); ?></head><body <?php body_class('hppwa-app-route'); ?>><div class="hppwa-shell" style="--brand: <?php echo esc_attr($settings['brand_colour']); ?>"><?php include $template; $this->nav($route); ?></div><?php wp_footer(); ?></body></html><?php
+        ?><!doctype html><html <?php language_attributes(); ?>><head><meta charset="<?php bloginfo('charset'); ?>"><?php wp_head(); ?></head><body <?php body_class('hppwa-app-route'); ?>><?php wp_body_open(); ?><div class="hppwa-shell" style="--brand: <?php echo esc_attr($settings['brand_colour']); ?>"><main class="hppwa-main"><?php include $template; ?></main><?php $this->nav($route); ?></div><?php wp_footer(); ?></body></html><?php
         exit;
     }
     private function nav(string $active): void { $items = ['home'=>'Home','listings'=>'Listings','developments'=>'Developments','saved'=>'Saved','contact'=>'Contact']; echo '<nav class="hppwa-bottom-nav">'; foreach ($items as $key=>$label) { $url = $key === 'home' ? '/app/' : '/app/'.$key.'/'; echo '<a class="'.esc_attr($active===$key?'active':'').'" href="'.esc_url(home_url($url)).'">'.esc_html($label).'</a>'; } echo '</nav>'; }
