@@ -34,14 +34,20 @@ final class HPPWA_Listings {
     }
     public function property_data(int $post_id): array {
         $terms = [];
-        foreach ($this->taxonomies() as $tax) { $names = wp_get_post_terms($post_id, $tax, ['fields' => 'names']); if (!is_wp_error($names)) { $terms = array_merge($terms, $names); } }
+        $taxonomies = $this->taxonomies();
+        foreach ($taxonomies as $tax) { $names = wp_get_post_terms($post_id, $tax, ['fields' => 'names']); if (!is_wp_error($names)) { $terms = array_merge($terms, $names); } }
+        $status = [];
+        if (in_array('property_status', $taxonomies, true)) {
+            $status_names = wp_get_post_terms($post_id, 'property_status', ['fields' => 'names']);
+            if (!is_wp_error($status_names)) { $status = $status_names; }
+        }
         $price = get_post_meta($post_id, 'fave_property_price', true) ?: get_post_meta($post_id, 'property_price', true);
         return [
             'id' => $post_id, 'title' => get_the_title($post_id), 'url' => get_permalink($post_id),
             'image' => get_the_post_thumbnail_url($post_id, 'large') ?: HPPWA_URL . 'assets/icons/icon.svg',
             'price' => $price, 'bedrooms' => get_post_meta($post_id, 'fave_property_bedrooms', true),
             'bathrooms' => get_post_meta($post_id, 'fave_property_bathrooms', true), 'area' => get_post_meta($post_id, 'fave_property_size', true),
-            'location' => implode(', ', array_slice(array_unique($terms), 0, 3)), 'status' => implode(', ', wp_get_post_terms($post_id, 'property_status', ['fields' => 'names']) ?: []),
+            'location' => implode(', ', array_slice(array_unique($terms), 0, 3)), 'status' => implode(', ', $status),
         ];
     }
     public function developments(): array {
